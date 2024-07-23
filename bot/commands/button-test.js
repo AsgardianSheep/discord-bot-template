@@ -6,7 +6,7 @@ module.exports = {
         ["name"]: path.basename(__filename).split(".")[0],
         ["description"]: "Button test go brr"
     },
-    ["execute"]: (client,sqliteDatabase,interaction) => {
+    ["execute"]: (client,sqliteDatabase,interaction,utilities) => {
         const actionRow = new discord.ActionRowBuilder().addComponents(
             new discord.ButtonBuilder()
             .setCustomId(`${path.basename(path.dirname(path.dirname(__filename)))}/${path.basename(__filename).split(".")[0]}/test`)

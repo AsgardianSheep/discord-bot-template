@@ -6,7 +6,7 @@ module.exports = {
         ["name"]: path.basename(__filename).split(".")[0],
         ["description"]: "Embed test go brr",
     },
-    ["execute"]: (client,sqliteDatabase,interaction) => {
+    ["execute"]: (client,sqliteDatabase,interaction,utilities) => {
         interaction.reply({
             embeds: [
                 {

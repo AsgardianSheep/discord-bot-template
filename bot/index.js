@@ -91,19 +91,62 @@ function sqliteDatabase(fileDirectory,databaseName) {
 	return database;
 }
 
-for (const file of fs.readdirSync(`${__dirname}/onEvent`)) {
-	require(`${__dirname}/onEvent/${file}`)(client,sqliteDatabase);
-}
+{
+	const utilities = {
+		["clientMember"]: (guild) => {
+			return guild.members.cache.get(client.user.id);
+		},
+		["nameFromMember"]: (member) => {
+			return member.nickname ? member.nickname : member.user.globalName;
+		},
+		["relativeMemberHierarchyRelation"]: (guild,member1,member2) => {
+			let member1HasRoles = member1.roles !== undefined;
+			let member2HasRoles = member2.roles !== undefined;
 
-client.on(discord.Events.InteractionCreate,(interaction) => {
-	if (interaction.isChatInputCommand()) {
-		require(`${__dirname}/commands/${interaction.commandName}`).execute(client,sqliteDatabase,interaction);
+			if (member1HasRoles && !member2HasRoles) {
+				return "lower";
+			}
+
+			if (!member1HasRoles && member2HasRoles) {
+				return "higher";
+			}
+
+			if (!member1HasRoles && !member2HasRoles) {
+				return "same";
+			}
+			
+			if (member1.roles.highest.position > member2.roles.highest.position || member1.user.id === guild.ownerId) {
+				return "lower" ;
+			}
+
+			if (member1.roles.highest.position < member2.roles.highest.position || member2.user.id === guild.ownerId) {
+				return "higher" ;
+			}
+
+			if (member1.roles.highest.position === member2.roles.highest.position) {
+				return "same" ;
+			}
+		}
+	};
+	
+	client.on(discord.Events.InteractionCreate,(interaction) => {
+		if (interaction.isChatInputCommand()) {
+			try {
+				require(`${__dirname}/commands/${interaction.commandName}`).execute(client,sqliteDatabase,interaction,utilities);
+			} catch {}
+		}
+	});
+	
+	for (const file of fs.readdirSync(`${__dirname}/onEvent`)) {
+		try {
+			require(`${__dirname}/onEvent/${file}`)(client,sqliteDatabase,utilities);
+		} catch {}
 	}
-});
+}
 
 client.on(discord.Events.ClientReady,() => {
 	function setStatus() {
-		client.user.setActivity(`Used in ${Array.from(client.guilds.cache.entries()).length} servers`,{type: discord.ActivityType.Custom});
+		client.user.setActivity(`Used in ${Array.from(client.guilds.cache.entries()).length} servers`,{["type"]: discord.ActivityType.Custom});
 	}
 	
 	setStatus();

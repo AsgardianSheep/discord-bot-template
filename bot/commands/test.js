@@ -19,7 +19,7 @@ module.exports = {
             }
         ]
     },
-    ["execute"]: (client,sqliteDatabase,interaction) => {         
+    ["execute"]: (client,sqliteDatabase,interaction,utilities) => {         
         if (!interaction.options.get("option2")) {
             interaction.reply(interaction.options.get("option1").value);
         } else {
