@@ -93,11 +93,8 @@ function sqliteDatabase(fileDirectory,databaseName) {
 
 {
 	const utilities = {
-		["clientMember"]: (guild) => {
-			return guild.members.cache.get(client.user.id);
-		},
 		["nameFromMember"]: (member) => {
-			return member.nickname ? member.nickname : member.user.globalName;
+			return member.nickname ? member.nickname : member.user.globalName ? member.user.globalName : member.user.username;
 		},
 		["relativeMemberHierarchyRelation"]: (guild,member1,member2) => {
 			let member1HasRoles = member1.roles !== undefined;
@@ -131,16 +128,12 @@ function sqliteDatabase(fileDirectory,databaseName) {
 	
 	client.on(discord.Events.InteractionCreate,(interaction) => {
 		if (interaction.isChatInputCommand()) {
-			try {
-				require(`${__dirname}/commands/${interaction.commandName}`).execute(client,sqliteDatabase,interaction,utilities);
-			} catch {}
+			require(`${__dirname}/commands/${interaction.commandName}`).execute(client,sqliteDatabase,interaction,utilities);
 		}
 	});
 	
 	for (const file of fs.readdirSync(`${__dirname}/onEvent`)) {
-		try {
-			require(`${__dirname}/onEvent/${file}`)(client,sqliteDatabase,utilities);
-		} catch {}
+		require(`${__dirname}/onEvent/${file}`)(client,sqliteDatabase,utilities);
 	}
 }
 
